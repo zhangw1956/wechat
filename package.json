@@ -1,0 +1,22 @@
+{
+  "name": "wechat",
+  "version": "1.0.0",
+  "description": "微信公众号",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "zhangw",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "koa": "^2.7.0",
+    "koa-bodyparser": "^4.2.1",
+    "koa-bunyan-logger": "^2.1.0",
+    "koa-router": "^7.4.0",
+    "koa-xml-body": "^2.1.0",
+    "log4js": "^4.0.2",
+    "sha1": "^1.1.1",
+    "xml2js": "^0.4.19"
+  }
+}
