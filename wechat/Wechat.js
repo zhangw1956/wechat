@@ -1,15 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 const request = require('../utils/request');
-const wechatApi = 'https://api.weixin.qq.com/cgi-bin';
 const accessTokenPath = path.resolve('./access_token.txt');
 const { appId, appSecret } = require('../config');
+const getAccessTokenApi = require('./apis/getAccessToken');
 
 class wechat {
     constructor(options) {
-        this.accessToken;
+        this.prefix = 'https://api.weixin.qq.com/cgi-bin';
     }
-    getaAccessToken (){
+    accessTokenIsValid() {
+
+    }
+    getAccessToken (){
         return new Promise((resolve, reject) => {
             fs.readFile(accessTokenPath, 'utf8', (err, data) => {
                 if (err) {
@@ -37,18 +40,20 @@ class wechat {
         });
     }
     updateAccessToken(){
-        return request({
-            method: 'get',
-            uri: `${wechatApi}/token?grant_type=client_credential&appid=${appId}&secret=${appSecret}`
-        }).then(data => {
-            data = JSON.parse(data);
-            data.expires_in = data.expires_in - 0 + new Date().getTime() - 20;
-            fs.writeFileSync(accessTokenPath, data, {
-                encoding: 'utf8'});
+        return getAccessTokenApi().then(data => {
+            fs.writeFileSync(accessTokenPath, data, { encoding: 'utf8'});
             return Promise.resolve(data);
-        });
+        })
     }
     saveAccessToken(){}
+    getUserInfo() {
+        const info = require('./apis/user/info');
+        return info(this);
+    }
+    getUserList() {
+        const list = require('./apis/user/list');
+        return list(this);
+    }
 }
 
 modules.export = wechat;

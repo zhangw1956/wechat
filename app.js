@@ -3,6 +3,8 @@ const bodyParser = require('koa-bodyparser');
 const xmlBody = require('koa-xml-body');
 const koaBunyanLogger = require('koa-bunyan-logger');
 const router = require('./routes');
+const wechat = require('./middlewares/wechat');
+
 const app = new koa();
 
 app.use(koaBunyanLogger());
@@ -11,7 +13,7 @@ app.use(koaBunyanLogger());
 
 app.use(xmlBody());
 app.use(bodyParser()); 
-
+app.use(wechat());
 app.use(router.routes()).use(router.allowedMethods());
 
 app.listen(3000, () => {
