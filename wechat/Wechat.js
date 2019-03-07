@@ -1,54 +1,55 @@
-const fs = require('fs');
-const path = require('path');
-const request = require('../utils/request');
-const accessTokenPath = path.resolve('./access_token.txt');
-const { appId, appSecret } = require('../config');
 const getAccessTokenApi = require('./apis/getAccessToken');
 
 class wechat {
     constructor(options) {
         this.prefix = 'https://api.weixin.qq.com/cgi-bin';
-    }
-    accessTokenIsValid() {
-
-    }
-    getAccessToken (){
-        return new Promise((resolve, reject) => {
-            fs.readFile(accessTokenPath, 'utf8', (err, data) => {
-                if (err) {
-                    if (err.code === 'ENOENT') {
-                        this.updateAccessToken().then(data => {
-                            resolve(data);
-                        })
-                        .catch(e => {
-                            reject(e)
-                        });
-                    }
-                    reject(err);
-                }
+        this.appId = options.appId;
+        this.appSecret = options.appSecret;
+        this.access_token = '';
+        this.getAccessToken = options.getAccessToken;
+        this.saveAccessToken = options.saveAccessToken;
+        this.getAccessToken().then(data => {
+            try {
                 data = JSON.parse(data);
-                if (data.expires_in >= new Date().getTime()) {
-                    this.updateAccessToken().then(data => {
-                        resolve(data);
-                    })
-                    .catch(e => {
-                        reject(e)
-                    });
-                }
-                resolve(data);
-              });
+            } catch(e) {
+                throw e;
+            }
+            if (this.accessTokenIsValid(data)) {
+                this.access_token = data.access_token;
+            } else {
+                this.updateAccessToken();
+            }
+        }).catch(e => {
+            if (e.code === 'ENOENT') {
+                this.updateAccessToken();
+                return;
+            }
+            throw e;
         });
     }
+    accessTokenIsValid(data) {
+        const now = new Date().getTime();
+        if (!data || !data.access_token || !data.expires_in || data.expires_in <= now ) {
+            return false;
+        }
+        return true;
+    }
     updateAccessToken(){
-        return getAccessTokenApi().then(data => {
-            fs.writeFileSync(accessTokenPath, data, { encoding: 'utf8'});
-            return Promise.resolve(data);
+        getAccessTokenApi(this).then(data => {
+            try {
+                data = JSON.parse(data);
+                const now = new Date().getTime();
+                data.expires_in = now + (data.expires_in - 20) * 1000;
+            } catch (e) {
+                throw e;
+            }
+            this.access_token = data.access_token;
+            this.saveAccessToken(data);
         })
     }
-    saveAccessToken(){}
-    getUserInfo() {
+    getUserInfo(openId) {
         const info = require('./apis/user/info');
-        return info(this);
+        return info({ openId, ...this});
     }
     getUserList() {
         const list = require('./apis/user/list');
@@ -56,4 +57,4 @@ class wechat {
     }
 }
 
-modules.export = wechat;
+module.exports = wechat;

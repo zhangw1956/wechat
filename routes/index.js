@@ -22,24 +22,24 @@ router.get('/wechat', (ctx, next) => {
     }
 });
 
-router.post('/wechat', (ctx, next) => {
+router.post('/wechat', async (ctx, next) => {
     const data = ctx.request.body.xml;
-    console.log(data);
     const MsgType = data.MsgType[0];
     if (MsgType === 'event') {
         const Event = data.Event[0];
         const ToUserName = data.ToUserName[0];
         const FromUserName = data.FromUserName[0];
         if (Event === 'subscribe') {
+            const data = await ctx.app.wechat.getUserInfo(FromUserName);
             ctx.body = ejs.render(reply, {
                 ToUserName: FromUserName,
                 FromUserName: ToUserName,
                 CreateTime: new Date(),
-                Content: '你好'
+                Content: '你好! ' + data.nickname
             });
         }
         if (Event === 'unsubscribe') {
-
+            
         }
     } else {
 
