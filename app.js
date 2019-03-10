@@ -1,7 +1,7 @@
 const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const xmlBody = require('koa-xml-body');
-const koaBunyanLogger = require('koa-bunyan-logger');
+const logger = require('koa-logger');
 const router = require('./routes');
 const Wechat = require('./wechat/Wechat');
 const { appId, appSecret, getAccessToken, saveAccessToken } = require('./config');
@@ -15,10 +15,7 @@ app.wechat = new Wechat({
     saveAccessToken: saveAccessToken
 });
 
-app.use(koaBunyanLogger());
-//app.use(koaBunyanLogger.requestIdContext());
-//app.use(koaBunyanLogger.requestLogger());
-
+app.use(logger());
 app.use(xmlBody());
 app.use(bodyParser());
 app.use(router.routes()).use(router.allowedMethods());

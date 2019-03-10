@@ -1,5 +1,5 @@
 const getAccessTokenApi = require('./apis/getAccessToken');
-
+const reply = require('./reply/reply');
 class wechat {
     constructor(options) {
         this.prefix = 'https://api.weixin.qq.com/cgi-bin';
@@ -17,11 +17,11 @@ class wechat {
             if (this.accessTokenIsValid(data)) {
                 this.access_token = data.access_token;
             } else {
-                this.updateAccessToken();
+                this.accessTokenUpdate();
             }
         }).catch(e => {
             if (e.code === 'ENOENT') {
-                this.updateAccessToken();
+                this.accessTokenUpdate();
                 return;
             }
             throw e;
@@ -34,27 +34,43 @@ class wechat {
         }
         return true;
     }
-    updateAccessToken(){
+    accessTokenUpdate(){
         getAccessTokenApi(this).then(data => {
-            try {
-                data = JSON.parse(data);
-                const now = new Date().getTime();
-                data.expires_in = now + (data.expires_in - 20) * 1000;
-            } catch (e) {
-                throw e;
-            }
+            const now = new Date().getTime();
+            data.expires_in = now + (data.expires_in - 20) * 1000;
             this.access_token = data.access_token;
             this.saveAccessToken(data);
         })
     }
-    getUserInfo(openId) {
+    replyBody({MsgType, options}) {
+        if (typeof reply[MsgType] !== 'function') {
+            throw new Error(`call createReplyTemplate error, Msgtype:${MsgType} is not surport`);
+        }
+        return reply[MsgType](options); 
+    }
+    commentOpen() {}
+    ommentClose() {}
+    commentList() {}
+    commentMarkelect() {}
+    commentUnmarkelect() {}
+    commentDelete() {}
+    commentReplyAdd() {}
+    commentReplyDelete() {}
+    tagsCreate() {}
+    tagsGet() {}
+    tagsUpdate() {}
+    tagsMembersGetblacklist() {}
+    tagsMembersBatchblacklist() {}
+    userInfo(openId) {
         const info = require('./apis/user/info');
-        return info({ openId, ...this});
+        console.log(this);
+        return info.call(this, openId);
     }
-    getUserList() {
+    userList() {
         const list = require('./apis/user/list');
-        return list(this);
+        return list.call(this);
     }
+    userInfoUpdateremark() {}
 }
 
 module.exports = wechat;

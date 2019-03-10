@@ -1,9 +1,9 @@
 const request = require('../../../utils/request');
 
-module.exports = (body) => {
+module.exports = body => {
     return request({
         method: 'post',
-        uri: `${this.prefix}/menu/create?access_token=${this.access_token}`,
+        uri: `${this.prefix}/material/del_material?access_token=${this.access_token}`,
         body
     });
 }

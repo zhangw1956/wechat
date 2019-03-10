@@ -1,8 +1,8 @@
 const request = require('../../../utils/request');
 
-module.exports = ({ prefix, access_token, openId}) => {
+module.exports = function (openId) {
     return request({
         method: 'get',
-        uri: `${prefix}/user/info?access_token=${access_token}&openid=${openId}&lang=zh_CN`,
+        uri: `${this.prefix}/user/info?access_token=${this.access_token}&openid=${openId}&lang=zh_CN`,
     });
 }

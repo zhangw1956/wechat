@@ -3,6 +3,6 @@ const request = require('../../../utils/request');
 module.exports = () => {
     return request({
         method: 'get',
-        uri: `${this.prefix}/user/get?access_token=${this.access_token}&next_openid=''`,
+        uri: `${this.prefix}/media/get?access_token=${this.access_token}&type=${this.type}&media_id=${this.media_id}`,
     });
 }

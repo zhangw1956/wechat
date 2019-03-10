@@ -1,8 +1,6 @@
 const Router = require('koa-router');
 const sha1 = require('sha1');
-const ejs = require('ejs');
 const config = require('../config');
-const reply = require('../wechat/messageTemplate/reply');
 
 const router = new Router();
 
@@ -24,23 +22,36 @@ router.get('/wechat', (ctx, next) => {
 
 router.post('/wechat', async (ctx, next) => {
     const data = ctx.request.body.xml;
+    console.log(data);
+    const ToUserName = data.ToUserName[0];
+    const FromUserName = data.FromUserName[0];
     const MsgType = data.MsgType[0];
     if (MsgType === 'event') {
         const Event = data.Event[0];
-        const ToUserName = data.ToUserName[0];
-        const FromUserName = data.FromUserName[0];
         if (Event === 'subscribe') {
-            const data = await ctx.app.wechat.getUserInfo(FromUserName);
-            ctx.body = ejs.render(reply, {
-                ToUserName: FromUserName,
-                FromUserName: ToUserName,
-                CreateTime: new Date(),
-                Content: '你好! ' + data.nickname
+            const userInfo = await ctx.app.wechat.userInfo(FromUserName);
+            console.error(userInfo);
+            ctx.body = ctx.app.wechat.replyBody({
+                MsgType: 'text',
+                options: {
+                    ToUserName: FromUserName,
+                    FromUserName: ToUserName,
+                    Content: '你好！ ' + userInfo.nickname
+                }
             });
         }
         if (Event === 'unsubscribe') {
             
         }
+    } else if (MsgType === 'text') {
+        ctx.body = ctx.app.wechat.createReplyTemplate({
+            MsgType: 'text',
+            options: {
+                ToUserName: FromUserName,
+                FromUserName: ToUserName,
+                Content: '您输入的是 ' + data.Content
+            }
+        });
     } else {
 
     }
