@@ -29,9 +29,9 @@ router.post('/wechat', async (ctx, next) => {
     if (MsgType === 'event') {
         const Event = data.Event[0];
         if (Event === 'subscribe') {
-            const userInfo = await ctx.app.wechat.userInfo(FromUserName);
+            const userInfo = await ctx.wechat.userInfo(FromUserName);
             console.error(userInfo);
-            ctx.body = ctx.app.wechat.replyBody({
+            ctx.body = ctx.wechat.replyBody({
                 MsgType: 'text',
                 options: {
                     ToUserName: FromUserName,
@@ -44,7 +44,7 @@ router.post('/wechat', async (ctx, next) => {
             
         }
     } else if (MsgType === 'text') {
-        ctx.body = ctx.app.wechat.createReplyTemplate({
+        ctx.body = ctx.wechat.replyBody({
             MsgType: 'text',
             options: {
                 ToUserName: FromUserName,
